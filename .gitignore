@@ -1,0 +1,19 @@
+# Android
+**/build/
+*.iml
+.gradle
+local.properties
+.idea/
+
+# Backend / Node
+node_modules/
+.env
+
+# Secrets / Keys
+*.json
+*.keystore
+*.jks
+
+# OS
+.DS_Store
+Thumbs.db

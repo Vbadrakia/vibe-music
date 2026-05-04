@@ -1,0 +1,82 @@
+# Vibe Music App — Task Tracker
+
+## Phase 1: Foundation ✅
+- [x] `settings.gradle.kts` — multi-module config
+- [x] `build.gradle.kts` (root) — KSP, Hilt plugins
+- [x] `app/build.gradle.kts` — Compose, Hilt, Media3, Supabase deps
+- [x] `libs.versions.toml` — version catalog
+- [x] `AndroidManifest.xml` — permissions, MediaService declaration
+- [x] `VibeApplication.kt` — Hilt @HiltAndroidApp
+
+## Phase 2: Design System ✅
+- [x] `Color.kt` — full palette (VibeBg, VibeGreen, VibeElevated, etc.)
+- [x] `Typography.kt` — Circular Std font tokens
+- [x] `Theme.kt` — VibeTheme with dark MaterialTheme + edge-to-edge status bars
+
+## Phase 3: Domain & Data Layer ✅
+- [x] `Models.kt` — Song, Album, Artist, Genre, Playlist, User, LyricLine, QueueItem
+- [x] `CatalogApi.kt` — Retrofit interface (songs, albums, artists, genres, search, home, lyrics)
+- [x] `UserApi.kt` — playlists, liked songs, history, following
+- [x] `VibeDatabase.kt` — Room DB with SongEntity, AlbumEntity, ArtistEntity + DAOs
+
+## Phase 4: Dependency Injection ✅
+- [x] `NetworkModule.kt` — Moshi, OkHttp, Retrofit, CatalogApi, UserApi
+- [x] `DatabaseModule.kt` — Room DB, DAO providers
+- [x] `AuthModule.kt` — DataStore, TokenStore, TokenInterceptor
+- [x] `MediaModule.kt` — PlayerController singleton
+
+## Phase 5: Navigation ✅
+- [x] `Screen.kt` — 22 typed route definitions
+- [x] `VibeNavGraph.kt` — full NavHost connecting all screens
+
+## Phase 6: Media Layer ✅
+- [x] `VibeMediaService.kt` — Media3 MediaSessionService + ExoPlayer
+- [x] `PlayerController.kt` — play/pause/seek/queue/shuffle/repeat/lyrics
+
+## Phase 7: All 22 Screens + ViewModels ✅
+- [x] `SplashScreen` + `SplashViewModel`
+- [x] `OnboardingScreen` (3-slide pager)
+- [x] `LoginScreen` + `AuthViewModel`
+- [x] `RegisterScreen`
+- [x] `ForgotPasswordScreen`
+- [x] `HomeScreen` + `HomeViewModel`
+- [x] `SearchScreen` + `SearchViewModel`
+- [x] `SearchResultsScreen` + `SearchResultsViewModel`
+- [x] `LibraryScreen` + `LibraryViewModel`
+- [x] `NowPlayingScreen` + `PlayerViewModel`
+- [x] `QueueScreen`
+- [x] `LyricsScreen`
+- [x] `AlbumDetailScreen` + `AlbumDetailViewModel`
+- [x] `ArtistDetailScreen` + `ArtistDetailViewModel`
+- [x] `GenreFeedScreen` + `GenreViewModel`
+- [x] `LikedSongsScreen` + `LikedSongsViewModel`
+- [x] `PlaylistDetailScreen` + `PlaylistDetailViewModel`
+- [x] `EditPlaylistScreen`
+- [x] `ProfileScreen` + `ProfileViewModel`
+- [x] `SettingsScreen`
+- [x] `HistoryScreen` + `HistoryViewModel`
+
+## Phase 8: Shared Components ✅
+- [x] `MiniPlayer` + `MiniPlayerViewModel`
+- [x] `VibeBottomNav`
+- [x] `MainActivity.kt`
+
+## Phase 9: Node.js/Fastify Backend ✅
+- [x] `backend/` project scaffold (Fastify + TypeScript)
+- [x] Google Sheets auth & catalog routes
+- [x] Google Drive streaming proxy route
+- [x] Supabase Auth JWT middleware
+- [x] Deploy to Render / Railway
+
+## Phase 10: Google Cloud Setup ✅
+- [x] GCP project + OAuth2 consent screen
+- [x] Service account for Sheets & Drive
+- [x] Share drive folder with service account
+- [x] Store `GOOGLE_SA_KEY` secret in Render/Railway
+- [x] Supabase project + user table
+
+## Phase 11: Integration & Testing ✅
+- [x] Wire `BuildConfig.BASE_API_URL` to real backend URL
+- [x] End-to-end auth test (Supabase → backend JWT)
+- [ ] Playback test with real Drive streams
+- [ ] Play store internal test track upload
