@@ -1,0 +1,33 @@
+{
+  "name": "vibe-backend",
+  "version": "1.0.0",
+  "description": "Vibe Music App — Fastify backend (Google Drive/Sheets + Supabase Auth)",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "@fastify/jwt": "^8.0.1",
+    "@fastify/rate-limit": "^9.1.0",
+    "@google-cloud/local-auth": "^3.0.1",
+    "fast-jwt": "latest",
+    "fastify": "^4.27.0",
+    "googleapis": "^140.0.1",
+    "lru-cache": "^10.2.2",
+    "pino": "^9.1.0",
+    "pino-pretty": "^11.0.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "tsx": "^4.11.0",
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -10,9 +10,10 @@ node_modules/
 .env
 
 # Secrets / Keys
-*.json
+# *.json  <-- Removed this as it ignores package.json
 *.keystore
 *.jks
+google-services.json
 
 # OS
 .DS_Store
