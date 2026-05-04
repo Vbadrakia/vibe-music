@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import multipart from '@fastify/multipart';
 import rateLimit from '@fastify/rate-limit';
 import { config } from './config.js';
 import { catalogRoutes } from './routes/catalog.js';
@@ -22,6 +23,12 @@ const start = async () => {
   await app.register(cors, {
     origin: true, // Allow all in dev — restrict to your app domain in prod
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  });
+
+  await app.register(multipart, {
+    limits: {
+      fileSize: 100 * 1024 * 1024, // 100 MB limit
+    },
   });
 
   await app.register(rateLimit, {

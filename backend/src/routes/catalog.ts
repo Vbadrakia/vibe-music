@@ -4,7 +4,10 @@ import {
   getAllAlbums,
   getAllArtists,
   getAllGenres,
+  addSongToSheet,
 } from '../services/sheets.js';
+import { uploadFileToDrive } from '../services/drive.js';
+import { extractAudioMetadata } from '../services/metadata.js';
 import { ok } from '../types.js';
 import type { Song, Album, Artist } from '../types.js';
 
@@ -185,5 +188,63 @@ export async function catalogRoutes(app: FastifyInstance) {
     };
 
     return reply.send(ok(homeData));
+  });
+
+  // ── POST /api/songs/upload ─────────────────────────────────────────────────
+  app.post('/api/songs/upload', async (req, reply) => {
+    try {
+      // Get the multipart data
+      const parts = await req.file();
+      if (!parts) {
+        return reply.code(400).send({ success: false, error: 'No file provided' });
+      }
+
+      const { filename, encoding, mimetype, file } = parts;
+
+      // Validate file type
+      const validMimes = ['audio/mpeg', 'audio/flac', 'audio/aac', 'audio/ogg', 'audio/wav'];
+      if (!validMimes.includes(mimetype)) {
+        return reply.code(400).send({ 
+          success: false, 
+          error: `Invalid file type. Supported: MP3, FLAC, AAC, OGG, WAV. Got: ${mimetype}` 
+        });
+      }
+
+      // Extract metadata from audio stream
+      const metadata = await extractAudioMetadata(file);
+
+      // Upload file to Google Drive
+      const driveFileId = await uploadFileToDrive(filename, mimetype, file);
+
+      // Create song object
+      const newSong: Omit<Song, 'id'> = {
+        title: metadata.title,
+        artist: metadata.artist,
+        artist_id: '', // Can be set by admin later
+        album: metadata.album,
+        album_id: '', // Can be set by admin later
+        duration_secs: metadata.duration,
+        cover_url: '', // Can be uploaded separately
+        drive_file_id: driveFileId,
+        genre: undefined,
+        track_number: undefined,
+        year: metadata.year,
+        lyrics_lrc_url: undefined,
+      };
+
+      // Add to Google Sheets
+      const songId = await addSongToSheet(newSong);
+
+      return reply.code(201).send(ok({
+        ...newSong,
+        id: songId,
+      }));
+    } catch (error: any) {
+      app.log.error(error);
+      return reply.code(500).send({
+        success: false,
+        error: error.message || 'Failed to upload song',
+      });
+    }
   });
 }

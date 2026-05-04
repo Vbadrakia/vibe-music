@@ -28,6 +28,7 @@ import com.vibe.app.ui.screens.search.SearchResultsScreen
 import com.vibe.app.ui.screens.search.SearchScreen
 import com.vibe.app.ui.screens.settings.SettingsScreen
 import com.vibe.app.ui.screens.splash.SplashScreen
+import com.vibe.app.presentation.screens.UploadScreen
 
 @Composable
 fun VibeNavGraph(navController: NavHostController) {
@@ -163,6 +164,9 @@ fun VibeNavGraph(navController: NavHostController) {
         }
         composable(Screen.History.route) {
             HistoryScreen(navController = navController)
+        }
+        composable(Screen.Upload.route) {
+            UploadScreen()
         }
     }
 }

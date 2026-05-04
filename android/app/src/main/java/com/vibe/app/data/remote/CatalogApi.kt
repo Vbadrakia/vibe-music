@@ -1,6 +1,7 @@
 package com.vibe.app.data.remote
 
 import com.vibe.app.domain.model.*
+import okhttp3.MultipartBody
 import retrofit2.http.*
 
 // ── Response wrappers ──────────────────────────────────────────────────────────
@@ -83,4 +84,11 @@ interface CatalogApi {
 
     @GET("api/episodes/{id}")
     suspend fun getEpisodeById(@Path("id") id: String): ApiResponse<Episode>
+
+    // Upload
+    @Multipart
+    @POST("api/songs/upload")
+    suspend fun uploadSong(
+        @Part file: MultipartBody.Part
+    ): ApiResponse<Song>
 }

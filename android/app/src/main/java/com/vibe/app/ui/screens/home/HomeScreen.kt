@@ -54,10 +54,35 @@ fun HomeScreen(
             }
         }
     ) { padding: PaddingValues ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(bottom = 16.dp)
-        ) {
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = VibeGreen
+                )
+            } else if (uiState.error != null) {
+                Column(
+                    modifier = Modifier.align(Alignment.Center).padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(Icons.Default.ErrorOutline, null, tint = Color.Red, modifier = Modifier.size(48.dp))
+                    Spacer(Modifier.height(16.dp))
+                    Text("Oops! Something went wrong", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(uiState.error ?: "Unknown error", color = Color.White.copy(0.6f), fontSize = 12.sp)
+                    Spacer(Modifier.height(16.dp))
+                    Button(
+                        onClick = { viewModel.load() },
+                        colors = ButtonDefaults.buttonColors(containerColor = VibeGreen)
+                    ) {
+                        Text("Retry", color = Color.Black)
+                    }
+                }
+            }
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 16.dp)
+            ) {
             // ── Header ──────────────────────────────────────────────────────
             item {
                 Row(
@@ -203,6 +228,7 @@ fun HomeScreen(
                         }
                     }
                 }
+            }
             }
         }
     }

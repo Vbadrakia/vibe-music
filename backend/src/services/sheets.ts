@@ -7,7 +7,7 @@ import type { Song, Album, Artist, Genre } from '../types.js';
 const auth = new google.auth.GoogleAuth({
   credentials: config.google.serviceAccountKey,
   scopes: [
-    'https://www.googleapis.com/auth/spreadsheets.readonly',
+    'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive.readonly',
   ],
 });
@@ -139,4 +139,37 @@ function rowToGenre(r: string[]): Genre | null {
 export function invalidateCache(keys?: string[]) {
   if (keys) keys.forEach(k => cache.delete(k));
   else cache.clear();
+}
+
+// ── Add a new song to the Songs sheet ──────────────────────────────────────────
+export async function addSongToSheet(song: Omit<Song, 'id'> & { id?: string }): Promise<string> {
+  const songId = song.id || `S${Date.now()}`;
+  
+  const values = [[
+    songId,                           // A: id
+    song.title,                        // B: title
+    song.artist,                       // C: artist
+    song.artist_id,                    // D: artist_id
+    song.album,                        // E: album
+    song.album_id,                     // F: album_id
+    song.duration_secs.toString(),    // G: duration_secs
+    song.cover_url,                    // H: cover_url
+    song.drive_file_id,                // I: drive_file_id
+    song.genre || '',                  // J: genre
+    song.track_number?.toString() || '', // K: track_number
+    song.year?.toString() || new Date().getFullYear().toString(), // L: year
+    song.lyrics_lrc_url || '',         // M: lyrics_lrc_url
+  ]];
+
+  await sheetsClient.spreadsheets.values.append({
+    spreadsheetId: config.google.sheetsId,
+    range: 'Songs!A2',
+    valueInputOption: 'RAW',
+    requestBody: { values },
+  });
+
+  // Invalidate cache so next query gets fresh data
+  invalidateCache(['all_songs']);
+
+  return songId;
 }

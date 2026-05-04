@@ -3,6 +3,7 @@ services:
   - type: web
     name: vibe-backend
     env: node
+    rootDir: backend
     region: singapore             # closest to India — change to oregon/frankfurt if needed
     plan: free
     buildCommand: npm install && npm run build

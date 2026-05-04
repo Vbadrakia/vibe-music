@@ -46,12 +46,16 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(client: OkHttpClient, moshi: Moshi): Retrofit =
-        Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_API_URL)
+    fun provideRetrofit(client: OkHttpClient, moshi: Moshi): Retrofit {
+        val baseUrl = BuildConfig.BASE_API_URL.let { 
+            if (it.endsWith("/")) it else "$it/" 
+        }
+        return Retrofit.Builder()
+            .baseUrl(baseUrl)
             .client(client)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
+    }
 
     @Provides @Singleton
     fun provideCatalogApi(retrofit: Retrofit): CatalogApi =
