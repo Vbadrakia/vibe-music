@@ -1,5 +1,7 @@
 package com.vibe.app.ui.screens.library
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -35,6 +37,25 @@ fun LibraryScreen(
     viewModel: LibraryViewModel = hiltViewModel()
 ) {
     val playlists by viewModel.playlists.collectAsState()
+    val uploadState by viewModel.uploadState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val uploadLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) viewModel.uploadSong(uri)
+    }
+
+    LaunchedEffect(uploadState.message, uploadState.error) {
+        uploadState.message?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearUploadStatus()
+        }
+        uploadState.error?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearUploadStatus()
+        }
+    }
+
     var showCreateDialog by remember { mutableStateOf(false) }
     var newPlaylistName by remember { mutableStateOf("") }
 
@@ -68,9 +89,13 @@ fun LibraryScreen(
                 Row(Modifier.fillMaxWidth().padding(vertical = 20.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text("Your Library", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Black)
                     Row {
-                        IconButton(onClick = {}) { Icon(Icons.Default.Search, null, tint = Color.White) }
+                        IconButton(onClick = { uploadLauncher.launch(arrayOf("audio/*")) }) { Icon(Icons.Default.FileUpload, null, tint = Color.White) }
                         IconButton(onClick = { showCreateDialog = true }) { Icon(Icons.Default.Add, null, tint = Color.White) }
                     }
+                }
+                if (uploadState.isUploading) {
+                    Spacer(Modifier.height(8.dp))
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = VibeGreen, trackColor = VibeDivider)
                 }
             }
 

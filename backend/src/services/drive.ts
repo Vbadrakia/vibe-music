@@ -1,14 +1,11 @@
 import { google } from 'googleapis';
+import { Readable } from 'node:stream';
 import { config } from '../config.js';
 import type { LyricLine } from '../types.js';
-import type { Readable } from 'stream';
 
 const auth = new google.auth.GoogleAuth({
   credentials: config.google.serviceAccountKey,
-  scopes: [
-    'https://www.googleapis.com/auth/drive.readonly',
-    'https://www.googleapis.com/auth/drive.file', // Allow file uploads
-  ],
+  scopes: ['https://www.googleapis.com/auth/drive'],
 });
 
 export const driveClient = google.drive({ version: 'v3', auth });
@@ -29,6 +26,27 @@ export async function getDriveFileMeta(fileId: string) {
     fileId,
     fields: 'id,name,mimeType,size',
   });
+  return res.data;
+}
+
+export async function uploadDriveFile(params: {
+  fileName: string;
+  mimeType: string;
+  buffer: Buffer;
+  folderId?: string;
+}) {
+  const res = await driveClient.files.create({
+    requestBody: {
+      name: params.fileName,
+      parents: params.folderId ? [params.folderId] : undefined,
+    },
+    media: {
+      mimeType: params.mimeType,
+      body: Readable.from(params.buffer),
+    },
+    fields: 'id,name,mimeType,size',
+  });
+
   return res.data;
 }
 
@@ -62,29 +80,4 @@ export function parseLrc(lrcContent: string): LyricLine[] {
   }
 
   return lines.sort((a, b) => a.timeMs - b.timeMs);
-}
-
-// ── Upload file to Google Drive ────────────────────────────────────────────────
-export async function uploadFileToDrive(
-  fileName: string,
-  mimeType: string,
-  stream: Readable
-): Promise<string> {
-  const response = await driveClient.files.create({
-    requestBody: {
-      name: fileName,
-      mimeType: mimeType,
-      parents: [config.google.driveFolderId],
-    },
-    media: {
-      mimeType: mimeType,
-      body: stream,
-    },
-  });
-
-  if (!response.data.id) {
-    throw new Error('Failed to upload file to Google Drive');
-  }
-
-  return response.data.id;
 }

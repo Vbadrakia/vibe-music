@@ -1,7 +1,12 @@
 import { FastifyInstance } from 'fastify';
+import { config } from '../config.js';
 import { requireAuth, getUserId } from '../middleware/auth.js';
-import { getAllSongs } from '../services/sheets.js';
+import { getAllSongs, appendSongToCatalog } from '../services/sheets.js';
+import { uploadDriveFile } from '../services/drive.js';
 import { ok } from '../types.js';
+import { parseBuffer } from 'music-metadata';
+import { randomUUID } from 'node:crypto';
+import type { Song } from '../types.js';
 
 // ── In-memory user store (replace with Supabase DB in production) ──────────────
 // Structure: { userId -> { likedSongs: Set<string>, playlists: Map<string, Playlist>, history: HistoryEntry[] } }
@@ -40,7 +45,121 @@ function generateId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+function slugify(value: string) {
+  const slug = value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+  return slug || 'unknown';
+}
+
+function pickString(value: unknown) {
+  if (typeof value !== 'string') return '';
+  return value.trim();
+}
+
+function parseNumber(value: unknown) {
+  if (typeof value !== 'string' || !value.trim()) return undefined;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function filenameWithoutExtension(filename: string) {
+  return filename.replace(/\.[^.]+$/, '');
+}
+
+async function streamToBuffer(stream: NodeJS.ReadableStream) {
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
+}
+
 export async function userRoutes(app: FastifyInstance) {
+
+  app.post('/api/me/songs', { preHandler: requireAuth }, async (req, reply) => {
+    const uid = getUserId(req);
+
+    let fileBuffer: Buffer | undefined;
+    let fileName = `upload-${Date.now()}`;
+    let mimeType = 'audio/mpeg';
+    const fields: Record<string, string> = {};
+
+    for await (const part of req.parts()) {
+      if (part.type === 'file') {
+        if (part.fieldname !== 'file') {
+          part.file.resume();
+          continue;
+        }
+
+        fileName = part.filename ?? fileName;
+        mimeType = part.mimetype ?? mimeType;
+        fileBuffer = await streamToBuffer(part.file);
+      } else {
+        fields[part.fieldname] = String(part.value ?? '');
+      }
+    }
+
+    if (!fileBuffer) {
+      return reply.code(400).send({ success: false, error: 'Audio file is required' });
+    }
+
+    let metadata: Awaited<ReturnType<typeof parseBuffer>> | null = null;
+    try {
+      metadata = await parseBuffer(fileBuffer, mimeType);
+    } catch {
+      metadata = null;
+    }
+
+    const title = pickString(fields.title) || metadata?.common.title?.trim() || filenameWithoutExtension(fileName);
+    const artist = pickString(fields.artist) || metadata?.common.artists?.[0]?.trim() || 'Unknown Artist';
+    const album = pickString(fields.album) || metadata?.common.album?.trim() || 'Single';
+    const genre = pickString(fields.genre) || metadata?.common.genre?.[0]?.trim() || undefined;
+    const trackNumber = parseNumber(fields.track_number) ?? (typeof metadata?.common.track?.no === 'number' ? metadata.common.track.no : undefined);
+    const year = parseNumber(fields.year) ?? parseNumber(String(metadata?.common.year ?? ''));
+    const durationValue = Number(metadata?.format.duration ?? fields.duration_secs ?? 0);
+    const durationSecs = Number.isFinite(durationValue) ? Math.max(1, Math.round(durationValue)) : 1;
+
+    const songId = `song_${Date.now()}_${randomUUID().slice(0, 8)}`;
+    const uploadedFile = await uploadDriveFile({
+      fileName: `${songId}-${fileName}`,
+      mimeType,
+      buffer: fileBuffer,
+      folderId: config.google.driveFolderId,
+    });
+
+    if (!uploadedFile.id) {
+      return reply.code(502).send({ success: false, error: 'Failed to upload file to Drive' });
+    }
+
+    const song: Song = {
+      id: songId,
+      title,
+      artist,
+      artist_id: slugify(artist),
+      album,
+      album_id: slugify(album),
+      duration_secs: durationSecs,
+      cover_url: 'https://placehold.co/600x600/111827/1DB954?text=Vibe+Music',
+      drive_file_id: uploadedFile.id,
+      genre,
+      track_number: trackNumber,
+      year,
+      lyrics_lrc_url: undefined,
+    };
+
+    await appendSongToCatalog(song, {
+      uploadedBy: uid,
+      isUserUploaded: true,
+      createdAt: new Date().toISOString(),
+    });
+
+    return reply.code(201).send(ok(song));
+  });
 
   // ── Playlists ──────────────────────────────────────────────────────────────
 

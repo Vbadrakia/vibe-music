@@ -1,4 +1,11 @@
-# Android
+vibe-music-495120-b8de0bf58eac.json
+backend/node_modules/
+android/.kotlin/
+android/.gradle/
+android/app/build/
+backend/node_modules/
+/.idea/
+.DS_Store# Android
 **/build/
 *.iml
 .gradle

@@ -27,7 +27,8 @@ const start = async () => {
 
   await app.register(multipart, {
     limits: {
-      fileSize: 100 * 1024 * 1024, // 100 MB limit
+      fileSize: 50 * 1024 * 1024,
+      files: 1,
     },
   });
 

@@ -1,6 +1,8 @@
 package com.vibe.app.data.remote
 
 import com.vibe.app.domain.model.*
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.*
 
 // ── Request bodies ─────────────────────────────────────────────────────────────
@@ -43,6 +45,20 @@ interface UserApi {
     // ── Playlists ──────────────────────────────────────────────────────────────
     @GET("api/me/playlists")
     suspend fun getMyPlaylists(): ApiResponse<List<PlaylistDetailDto>>
+    
+    // ── User uploads ─────────────────────────────────────────────────────────
+    @Multipart
+    @POST("api/me/songs")
+    suspend fun uploadSong(
+        @Part file: MultipartBody.Part,
+        @Part("title") title: RequestBody,
+        @Part("artist") artist: RequestBody,
+        @Part("album") album: RequestBody,
+        @Part("genre") genre: RequestBody,
+        @Part("year") year: RequestBody,
+        @Part("track_number") trackNumber: RequestBody,
+        @Part("duration_secs") durationSecs: RequestBody,
+    ): ApiResponse<Song>
 
     @GET("api/me/playlists/{id}")
     suspend fun getPlaylistById(@Path("id") id: String): ApiResponse<PlaylistDetailDto>

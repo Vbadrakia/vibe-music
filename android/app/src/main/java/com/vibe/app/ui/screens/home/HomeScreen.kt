@@ -39,6 +39,7 @@ fun HomeScreen(
     navController: NavController,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
+    LaunchedEffect(Unit) { viewModel.load() }
     val uiState by viewModel.uiState.collectAsState()
     val greeting = remember {
         val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
