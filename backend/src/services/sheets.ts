@@ -90,6 +90,10 @@ export async function appendSongToCatalog(
 
 function rowToSong(r: string[]): Song | null {
   if (!r[0] || !r[1]) return null;
+  const safeInt = (val: any): number => {
+    const parsed = Number.parseInt((val ?? '0').toString().trim(), 10);
+    return isNaN(parsed) ? 0 : parsed;
+  };
   return {
     id: r[0],
     title: r[1],
@@ -97,12 +101,12 @@ function rowToSong(r: string[]): Song | null {
     artist_id: r[3] ?? '',
     album: r[4] ?? '',
     album_id: r[5] ?? '',
-    duration_secs: parseInt(r[6] ?? '0', 10),
+    duration_secs: safeInt(r[6]),
     cover_url: r[7] ?? '',
     drive_file_id: r[8] ?? '',
-    genre: r[9] ?? undefined,
-    track_number: r[10] ? parseInt(r[10], 10) : undefined,
-    year: r[11] ? parseInt(r[11], 10) : undefined,
+    genre: r[9] || undefined,
+    track_number: r[10] ? safeInt(r[10]) : undefined,
+    year: r[11] ? safeInt(r[11]) : undefined,
     lyrics_lrc_url: r[12] ?? undefined,
   };
 }
@@ -117,18 +121,19 @@ export async function getAllAlbums(): Promise<Album[]> {
 
 function rowToAlbum(r: string[]): Album | null {
   if (!r[0] || !r[1]) return null;
+  const safeInt = (val: any): number => {
+    const parsed = Number.parseInt((val ?? '0').toString().trim(), 10);
+    return isNaN(parsed) ? 0 : parsed;
+  };
   return {
     id: r[0],
     title: r[1],
     artist_id: r[2] ?? '',
     artist: r[3] ?? '',
-    year: (() => {
-      const parsed = parseInt(r[4]?.trim() ?? '0', 10);
-      return isNaN(parsed) ? new Date().getFullYear() : parsed;
-    })(),
+    year: safeInt(r[4]) || new Date().getFullYear(),
     cover_url: r[5] ?? '',
-    song_count: parseInt(r[6] ?? '0', 10),
-    total_duration_secs: parseInt(r[7] ?? '0', 10),
+    song_count: safeInt(r[6]),
+    total_duration_secs: safeInt(r[7]),
   };
 }
 

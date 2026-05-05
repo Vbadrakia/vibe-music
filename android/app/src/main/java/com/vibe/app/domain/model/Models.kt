@@ -35,8 +35,8 @@ data class Album(
     val artist: String,
     val year: Int? = null,
     @Json(name = "cover_url") val coverUrl: String,
-    @Json(name = "song_count") val songCount: Int,
-    @Json(name = "total_duration_secs") val totalDurationSecs: Int,
+    @Json(name = "song_count") val songCount: Int? = null,
+    @Json(name = "total_duration_secs") val totalDurationSecs: Int? = null,
     val songs: List<Song> = emptyList()
 )
 

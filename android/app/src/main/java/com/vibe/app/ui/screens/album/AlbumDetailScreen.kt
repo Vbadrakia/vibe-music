@@ -74,7 +74,10 @@ fun AlbumDetailScreen(
                             AsyncImage(model = "", contentDescription = null, modifier = Modifier.size(20.dp).clip(CircleShape))
                             Spacer(Modifier.width(6.dp))
                             Text(album.artist, color = VibeTextSecondary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                            Text("  ·  ${album.year}  ·  ${album.songCount} songs, ${album.totalDurationSecs / 60} min",
+                            val albumYear = album.year?.toString() ?: "Unknown year"
+                            val totalMinutes = (album.totalDurationSecs ?: 0) / 60
+                            val songCount = album.songCount ?: 0
+                            Text("  ·  $albumYear  ·  $songCount songs, ${totalMinutes} min",
                                 color = VibeTextSecondary, fontSize = 13.sp)
                         }
                     }
