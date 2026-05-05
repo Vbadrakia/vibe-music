@@ -16,6 +16,7 @@ import javax.inject.Inject
 data class HomeUiState(
     val isLoading: Boolean = true,
     val recentlyPlayed: List<Song> = emptyList(),
+    val recommendedSongs: List<Song> = emptyList(),
     val madeForYou: List<PlaylistDto> = emptyList(),
     val newReleases: List<Album> = emptyList(),
     val featuredPlaylists: List<PlaylistDto> = emptyList(),
@@ -42,9 +43,11 @@ class HomeViewModel @Inject constructor(
             _uiState.value = HomeUiState(isLoading = true, error = null)
             runCatching {
                 val home = api.getHome().data
+                val recommended = api.getSongs(limit = 10).data
                 _uiState.value = HomeUiState(
                     isLoading        = false,
                     recentlyPlayed   = home.recentlyPlayed,
+                    recommendedSongs = recommended,
                     madeForYou       = home.madeForYou,
                     newReleases      = home.newReleases,
                     featuredPlaylists = home.featuredPlaylists,

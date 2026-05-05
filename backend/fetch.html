@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fetch Songs</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
+</head>
+<body>
+  <h1>Fetching Songs...</h1>
+  <pre id="output"></pre>
+  <script>
+    async function fetchSongs() {
+      const output = document.getElementById('output');
+      const log = (msg) => { output.textContent += msg + '\n'; };
+
+      const saKey = {
+        client_email: 'vibe-backend@vibe-music-495120.iam.gserviceaccount.com',
+        private_key: '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCkBoSIMYpsuO1k\nVim/9GuU2lZgxcwStvn/Dl8I0VN1NyY2MMEFjpX4N1sfhokXCOPHxZVPulSchV3g\nRT/iTXZOuKfTkQ2qxON/VP44YBkNY1WflCvJuoPwPu4sjCyyWQ2xpqOoj9WfY+xn\n0qxQoLAd2+jnDmJxQM2Wz9zNXX/I5GK6huhxQ7bDyC53nRbx+MFS0sZT+7nu9p2w\nyzgUfBTLoaa2GL7U1yDoCmQzM81oczQ3XXORyb8XD7Fax/aKvLNZhmZA5MH8gBcO\nMDv5yIANUE4Vbrx93qnDVR+Jo5xFkCw3WJB2j5regieNbqoayfzmtqqSdlYIFdkT\n/MOUkAkXAgMBAAECggEACZAQYaj9vdlJjHwngqJF3rpHUeyw4/XDUnbshyTpEuA3\nEUQQuiRgzZqwlysZSqdWhvrtJGZOcNz8/EpymdzT78Kn6izpQ+enBHFDQax8mWwN\nUw3o6vcS98qQyTZs6VhJdO4sWXNKoY3KURfruub7YupDbwEcL9J231Auunxf1amU\ndn9Eyk+pSICMEUv+aRpIFkJFPD4QUx6+5iDy83NvVgPakS12+3LKtTB1jxBWBOy5\nlBEUz2nWcSVchGBv9tsHhuqpTR5rw4SQvcoMKjXAiojQyTTFx/UhJTxVTaXbss5b\n2EPZ2kJp89imXTNjbBMX3iOofTgZjltuKL1hZwvDeQKBgQDNDh9X4r7+KkGzep8O\ngNQSr1p5/WOSlpurIg0nbkJHmGF5TfXBUt8diIzMIsExVxVJ2N8smEzCbxBiBF0/\ngz0P1BP+0RNqTkfZVkjbc53LGbG/dh9NbROrdzOY/VQ7a7kPl4bamJHTp+fBl93p\nHDZiH8dXKIUxc4aji1TZETb+TwKBgQDMxtUGc3EsO451xcpceioV3LiCCezQ9Q4P\n/ZseXnEXfEToF5DT7ZwqowzNqeBGEM2mma2TvF+SbVcA399ll5iVCp8LsYrGoJXT\nAazMgF2ZhJBA1SRJN4aLekvP04KfQzqqUsQXFA30tkFzjy6Zp/cpMdVX2BjSlcQu\n/WQ5aWseuQKBgBP/5J61xtsTVAUlWI4ZkpWf9LshM60Ac35le9L0thI1kow6RlXs\nt0YyI0llumINlE33kQzQbewo2Pg2ZMHlEveQP8MCsVoU+H0CJWkCBcnhX6zE4Ji0\nos5+edHaI3UINKyIouZ/KvnxznDbVxF9ZvB7GP4vPY5tLhyVYlkpjKuRAoGBALtq\nmxtdWs4d8AOQM+YxlQUPTvsNNGYGcolmFatUynKxNKuqrc2ZIZ3QPu6YNIBL7rw0\n2K1m8Z2lXsSZIO/tMCPwZaIhKx8haB6H4OwF7CSONCxyJtSv8f8DvhEGxv0WXcH3\nICrzGtbGW970w7S0Crz0NAtC520Mz1Imba0x821ZAoGAJcsVbl0AiDLAe91xDZJj\nvVBZbulPVR8+60Dhe1x6P6LYfpq6gbpltUWB8hts7ENLOXyJ4HbirATqt95nlUUr\nJ9GmPlV232qUCF5GLnwdj7e5BmrTyHZmmY4OkalmrQUDtIbDfsUHJWVpvzVnOv9c\nP2dyTEOWcjdWshPezsD4ZB0=\n-----END PRIVATE KEY-----\n'
+      };
+
+      const now = Math.floor(Date.now() / 1000);
+      const header = { alg: 'RS256', typ: 'JWT' };
+      const claim = {
+        iss: saKey.client_email,
+        scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
+        aud: 'https://oauth2.googleapis.com/token',
+        exp: now + 3600,
+        iat: now
+      };
+
+      try {
+        const sHeader = JSON.stringify(header);
+        const sClaim = JSON.stringify(claim);
+        const token = KJUR.jws.JWS.sign(null, sHeader, sClaim, saKey.private_key);
+
+        const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=' + token
+        });
+        const tokenData = await tokenRes.json();
+        
+        if (!tokenData.access_token) {
+          log('Token error: ' + JSON.stringify(tokenData));
+          return;
+        }
+
+        const SHEET_ID = '19ZxwzxdrDOKo6utRLvbEFjZ2qcBo-ysLIH4SwkobfQE';
+        const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Songs!A:Z`, {
+          headers: { 'Authorization': 'Bearer ' + tokenData.access_token }
+        });
+        const data = await res.json();
+
+        if (data.values) {
+          const headers = data.values[0];
+          const rows = data.values.slice(1);
+          log('Found ' + rows.length + ' songs:');
+          rows.forEach((row, i) => {
+            const obj = {};
+            headers.forEach((h, j) => { if (row[j]) obj[h] = row[j]; });
+            log((i+1) + '. ' + JSON.stringify(obj));
+          });
+        } else {
+          log('No data found: ' + JSON.stringify(data));
+        }
+      } catch (err) {
+        log('Error: ' + err.message);
+      }
+    }
+    fetchSongs();
+  </script>
+</body>
+</html>
