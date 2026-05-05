@@ -35,7 +35,7 @@ export async function getAllSongs(): Promise<Song[]> {
 
   try {
     do {
-      const res = await drive.files.list({
+      const res: any = await drive.files.list({
         q: `'${config.google.driveFolderId}' in parents and trashed = false and mimeType contains 'audio/'`,
         fields: 'nextPageToken, files(id, name, appProperties)',
         pageToken,
