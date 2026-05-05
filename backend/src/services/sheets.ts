@@ -122,7 +122,10 @@ function rowToAlbum(r: string[]): Album | null {
     title: r[1],
     artist_id: r[2] ?? '',
     artist: r[3] ?? '',
-    year: parseInt(r[4] ?? '0', 10),
+    year: (() => {
+      const parsed = parseInt(r[4]?.trim() ?? '0', 10);
+      return isNaN(parsed) ? new Date().getFullYear() : parsed;
+    })(),
     cover_url: r[5] ?? '',
     song_count: parseInt(r[6] ?? '0', 10),
     total_duration_secs: parseInt(r[7] ?? '0', 10),

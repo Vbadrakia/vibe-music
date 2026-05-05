@@ -33,7 +33,7 @@ data class Album(
     val title: String,
     @Json(name = "artist_id") val artistId: String,
     val artist: String,
-    val year: Int,
+    val year: Int? = null,
     @Json(name = "cover_url") val coverUrl: String,
     @Json(name = "song_count") val songCount: Int,
     @Json(name = "total_duration_secs") val totalDurationSecs: Int,
