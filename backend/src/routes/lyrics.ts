@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { getDriveFileText, parseLrc } from '../services/drive.js';
-import { getAllSongs } from '../services/sheets.js';
+import { getAllSongs } from '../services/catalog.js';
 import { ok } from '../types.js';
 import { LRUCache } from 'lru-cache';
 import { config } from '../config.js';

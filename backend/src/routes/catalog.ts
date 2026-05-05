@@ -4,7 +4,7 @@ import {
   getAllAlbums,
   getAllArtists,
   getAllGenres,
-} from '../services/sheets.js';
+} from '../services/catalog.js';
 import { ok } from '../types.js';
 import type { Song, Album, Artist } from '../types.js';
 

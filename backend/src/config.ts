@@ -3,7 +3,6 @@ import 'dotenv/config';
 // ── Validate required env vars at startup ──────────────────────────────────────
 const required = [
   'GOOGLE_SA_KEY',
-  'SHEETS_ID',
   'DRIVE_FOLDER_ID',
   'SUPABASE_URL',
   'SUPABASE_SERVICE_ROLE_KEY',
@@ -24,7 +23,6 @@ export const config = {
   google: {
     // Parse the SA JSON (can be raw JSON string or file path in prod)
     serviceAccountKey: JSON.parse(process.env.GOOGLE_SA_KEY!),
-    sheetsId: process.env.SHEETS_ID!,
     driveFolderId: process.env.DRIVE_FOLDER_ID!,
   },
 

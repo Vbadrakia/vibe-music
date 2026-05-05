@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { getDriveFileStream, getDriveFileMeta } from '../services/drive.js';
-import { getAllSongs } from '../services/sheets.js';
+import { getAllSongs } from '../services/catalog.js';
 
 export async function streamRoutes(app: FastifyInstance) {
 

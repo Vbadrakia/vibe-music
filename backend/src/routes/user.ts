@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { config } from '../config.js';
 import { requireAuth, getUserId } from '../middleware/auth.js';
-import { getAllSongs, appendSongToCatalog } from '../services/sheets.js';
+import { getAllSongs, appendSongToCatalog } from '../services/catalog.js';
 import { uploadDriveFile } from '../services/drive.js';
 import { ok } from '../types.js';
 import { parseBuffer } from 'music-metadata';
