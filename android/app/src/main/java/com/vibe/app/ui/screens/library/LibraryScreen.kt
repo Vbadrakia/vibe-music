@@ -16,6 +16,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -81,10 +84,29 @@ fun LibraryScreen(
     }
 
     Scaffold(
-        containerColor = VibeBg,
+        containerColor = Color.Transparent,
         bottomBar = { Column { MiniPlayer(navController = navController); VibeBottomNav(navController, Screen.Library.route) } }
     ) { padding ->
-        LazyColumn(modifier = Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(horizontal = 16.dp)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(VibeBg)
+                .drawWithCache {
+                    val gradient = Brush.radialGradient(
+                        colors = listOf(
+                            Color(0xFF4A0080).copy(alpha = 0.15f), // Deep purple tint for Library
+                            Color.Transparent
+                        ),
+                        center = Offset(size.width, 0f),
+                        radius = size.width * 1.5f
+                    )
+                    onDrawBehind {
+                        drawRect(gradient)
+                    }
+                }
+                .padding(padding)
+        ) {
+            LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 16.dp)) {
             item {
                 Row(Modifier.fillMaxWidth().padding(vertical = 20.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text("Your Library", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Black)
@@ -108,8 +130,19 @@ fun LibraryScreen(
                         FilterChip(
                             selected = selected == i, onClick = { selected = i },
                             label = { Text(label, fontSize = 13.sp) },
-                            colors = FilterChipDefaults.filterChipColors(selectedContainerColor = VibeGreen, selectedLabelColor = Color.Black, containerColor = VibeElevated, labelColor = Color.White),
-                            shape = CircleShape, border = null
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = VibeGreen, 
+                                selectedLabelColor = Color.Black, 
+                                containerColor = VibeCard, // Glassy
+                                labelColor = Color.White
+                            ),
+                            shape = CircleShape, 
+                            border = FilterChipDefaults.filterChipBorder(
+                                enabled = true,
+                                selected = selected == i,
+                                borderColor = VibeBorder,
+                                selectedBorderColor = VibeGreen
+                            )
                         )
                     }
                 }
@@ -122,7 +155,7 @@ fun LibraryScreen(
                     modifier = Modifier.fillMaxWidth().clickable { navController.navigate(Screen.LikedSongs.route) }.padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(Modifier.size(52.dp).clip(RoundedCornerShape(6.dp)).background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color(0xFF4A0080), Color(0xFF1DB954)))),
+                    Box(Modifier.size(52.dp).clip(RoundedCornerShape(6.dp)).background(Brush.verticalGradient(listOf(Color(0xFF4A0080), VibeGreen))),
                         contentAlignment = Alignment.Center) {
                         Icon(Icons.Default.Favorite, null, tint = Color.White, modifier = Modifier.size(26.dp))
                     }

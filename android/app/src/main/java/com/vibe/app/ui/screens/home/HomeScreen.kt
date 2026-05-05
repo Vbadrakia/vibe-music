@@ -1,6 +1,10 @@
 package com.vibe.app.ui.screens.home
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +22,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -56,7 +62,7 @@ fun HomeScreen(
     val tabs = remember { listOf("Music", "Podcasts & Shows", "Audiobooks") }
 
     Scaffold(
-        containerColor = VibeBg,
+        containerColor = Color.Transparent,
         bottomBar = {
             Column {
                 MiniPlayer(navController = navController)
@@ -67,6 +73,20 @@ fun HomeScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(VibeBg)
+                .drawWithCache {
+                    val gradient = Brush.radialGradient(
+                        colors = listOf(
+                            VibeGreen.copy(alpha = 0.15f),
+                            Color.Transparent
+                        ),
+                        center = Offset(size.width, 0f),
+                        radius = size.width * 1.5f
+                    )
+                    onDrawBehind {
+                        drawRect(gradient)
+                    }
+                }
                 .padding(innerPadding)
         ) {
             when {
@@ -190,11 +210,16 @@ private fun HomeContent(
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = VibeGreen,
                             selectedLabelColor = Color.Black,
-                            containerColor = VibeElevated,
+                            containerColor = VibeCard, // Glassy
                             labelColor = Color.White
                         ),
                         shape = CircleShape,
-                        border = null
+                        border = FilterChipDefaults.filterChipBorder(
+                            enabled = true,
+                            selected = selectedTabIndex == i,
+                            borderColor = VibeBorder,
+                            selectedBorderColor = VibeGreen
+                        )
                     )
                 }
             }
@@ -422,10 +447,11 @@ private fun SongCard(song: Song, onClick: () -> Unit) {
             contentDescription = null,
             modifier = Modifier
                 .size(140.dp)
-                .clip(RoundedCornerShape(8.dp)),
+                .clip(RoundedCornerShape(12.dp))
+                .border(1.dp, VibeBorder, RoundedCornerShape(12.dp)),
             contentScale = ContentScale.Crop
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(12.dp))
         Text(
             text = song.title,
             color = Color.White,
@@ -456,10 +482,11 @@ private fun ShowCard(show: Show, onClick: () -> Unit) {
             contentDescription = null,
             modifier = Modifier
                 .size(140.dp)
-                .clip(RoundedCornerShape(8.dp)),
+                .clip(RoundedCornerShape(12.dp))
+                .border(1.dp, VibeBorder, RoundedCornerShape(12.dp)),
             contentScale = ContentScale.Crop
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(12.dp))
         Text(
             text = show.name,
             color = Color.White,
@@ -482,10 +509,12 @@ private fun ShowCard(show: Show, onClick: () -> Unit) {
 private fun RecentCard(song: Song, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Row(
         modifier = modifier
-            .background(VibeElevated, RoundedCornerShape(8.dp))
+            .background(VibeCard, RoundedCornerShape(8.dp))
+            .border(1.dp, VibeBorder, RoundedCornerShape(8.dp))
             .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
-            .height(56.dp),
+            .height(56.dp)
+            .animateContentSize(spring(stiffness = Spring.StiffnessLow)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
